@@ -1,0 +1,8 @@
+<ul id="msg-list" style="list-style: none; min-height:200px;
+  border: 1px solid #e5e5e5; padding: 10px;">
+    <%= for m <- @messages do %>
+      <li><b> <%= m.name %> </b> <%= m.message %> </li>
+    <% end %>
+</ul>
+
+<%= render "message_form.html", assigns %>
