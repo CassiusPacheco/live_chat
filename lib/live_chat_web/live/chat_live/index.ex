@@ -13,10 +13,11 @@ defmodule LiveChatWeb.ChatLive.Index do
     LiveChatWeb.ChatView.render("index.html", assigns)
   end
 
-  def fetch(socket) do
+  def fetch(socket, user_name \\ nil) do
     assign(socket, %{
+      user_name: user_name,
       messages: Chat.list_messages(),
-      changeset: Chat.change_message(%Message{})
+      changeset: Chat.change_message(%Message{name: user_name})
     })
   end
 
@@ -31,8 +32,8 @@ defmodule LiveChatWeb.ChatLive.Index do
 
   def handle_event("send_message", %{"message" => params}, socket) do
     case Chat.create_message(params) do
-      {:ok, _message} ->
-        {:noreply, fetch(socket)}
+      {:ok, message} ->
+        {:noreply, fetch(socket, message.name)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, changeset: changeset)}
@@ -40,6 +41,11 @@ defmodule LiveChatWeb.ChatLive.Index do
   end
 
   def handle_info({Chat, [:message, _event_type], _message}, socket) do
-    {:noreply, fetch(socket)}
+    {:noreply, fetch(socket, get_user_name(socket))}
+  end
+
+  defp get_user_name(socket) do
+    socket.assigns
+    |> Map.get(:user_name)
   end
 end
